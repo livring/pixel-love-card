@@ -106,6 +106,14 @@
   .wiggle{ animation:wiggle .9s steps(3) infinite; }
   @keyframes wiggle{ 0%,100%{ transform:rotate(-4deg);} 50%{ transform:rotate(4deg);} }
 
+  /* ============ 问题行（文字 + 右上方颜文字） ============ */
+  .qline{
+    display:flex; align-items:flex-start; justify-content:center;
+    gap:14px; flex-wrap:wrap; width:100%;
+  }
+  .qline h2{ line-height:1.5; }
+  .kaomoji{ flex-shrink:0; margin-top:-6px; }
+
   /* ============ 第一步 选项 ============ */
   .choices{ display:flex; gap:26px; align-items:center; justify-content:center; flex-wrap:wrap; }
   #btnNo{ position:relative; background:#fff; color:var(--ink); box-shadow:0 6px 0 #c9c9c9; }
@@ -212,8 +220,10 @@
 
   <!-- 第 1 步：邀请 -->
   <section class="card" id="step1">
-    <div id="cat1"></div>
-    <h2 class="zh">彤彤愿意跟我出去吗？</h2>
+    <div class="qline">
+      <h2 class="zh">彤彤愿意跟我出去吗？</h2>
+      <div class="kaomoji"><div id="cat1"></div></div>
+    </div>
     <div class="choices">
       <button class="btn" id="btnYes">YES!</button>
       <button class="btn ghost" id="btnNo">No</button>
@@ -290,20 +300,30 @@
 <footer class="zh">made with ❤ &amp; pixels · 2026</footer>
 
 <script>
-/* ================= 像素画渲染 ================= */
+/* ================= 像素画渲染（Canvas，精确尺寸不溢出） ================= */
 function pixel(el, grid, palette, px){
   px = px || 6;
   var lines = grid.trim().split("\n").map(s => s.trim());
-  var h = lines.length, w = lines[0].length, sh = [];
+  var h = lines.length, w = lines[0].length;
+  el.className = "pix";
+  el.style.width  = (w*px) + "px";
+  el.style.height = (h*px) + "px";
+  el.style.boxShadow = "none";
+  el.innerHTML = "";
+  var c = document.createElement("canvas");
+  c.width = w*px; c.height = h*px;
+  c.style.width = w*px + "px"; c.style.height = h*px + "px";
+  c.style.display = "block"; c.style.imageRendering = "pixelated";
+  var ctx = c.getContext("2d");
   for(var y=0; y<h; y++)
     for(var x=0; x<w; x++){
-      var c = lines[y][x];
-      if(c !== "." && palette[c]) sh.push((x+1)*px + "px " + (y+1)*px + "px 0 " + palette[c]);
+      var ch = lines[y][x];
+      if(ch !== "." && palette[ch]){
+        ctx.fillStyle = palette[ch];
+        ctx.fillRect(x*px, y*px, px, px);
+      }
     }
-  el.className = "pix";
-  el.style.width = el.style.height = px + "px";
-  el.style.boxShadow = sh.join(",");
-  el.style.marginBottom = px*2 + "px";
+  el.appendChild(c);
 }
 
 var HEART = `
