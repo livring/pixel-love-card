@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>像素爱心卡片 💗</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  /* ============ 像素风基础 ============ */
+  :root{
+    --pink:#ff5a8a;
+    --pink-dark:#d92b62;
+    --pink-light:#ffd6e3;
+    --bg:#fff0f4;
+    --ink:#3b2233;
+    --card:#ffffff;
+    --yellow:#ffd447;
+    --green:#4ecb71;
+    --blue:#5aa9ff;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ height:100%; }
+  body{
+    font-family:"Press Start 2P","Zpix","DotGothic16",monospace,"Microsoft YaHei";
+    background:var(--bg);
+    background-image:
+      linear-gradient(rgba(255,90,138,.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,90,138,.06) 1px, transparent 1px);
+    background-size:24px 24px;
+    color:var(--ink);
+    display:flex; flex-direction:column; align-items:center;
+    min-height:100vh;
+    overflow-x:hidden;
+    image-rendering:pixelated;
+  }
+  .zh{ font-family:"Zpix","DotGothic16","Microsoft YaHei",sans-serif; letter-spacing:.08em; }
+
+  /* ============ 顶部标题 ============ */
+  header{
+    margin:28px 16px 8px;
+    text-align:center;
+  }
+  header h1{
+    font-size:clamp(14px, 3.5vw, 22px);
+    color:var(--pink-dark);
+    text-shadow:3px 3px 0 var(--pink-light);
+    line-height:1.8;
+  }
+  header .sub{
+    margin-top:10px; font-size:10px; color:#a3798f;
+  }
+
+  /* ============ 进度点 ============ */
+  .dots{
+    display:flex; gap:10px; margin:18px 0 6px;
+  }
+  .dots i{
+    width:12px; height:12px; background:#f0c3d2;
+    box-shadow:2px 2px 0 rgba(59,34,51,.25);
+    transition:all .2s steps(3);
+  }
+  .dots i.on{ background:var(--pink); width:26px; }
+
+  /* ============ 卡片主体 ============ */
+  .stage{
+    position:relative; width:min(92vw, 560px);
+    min-height:430px; margin:16px 0 40px;
+  }
+  .card{
+    position:absolute; inset:0;
+    background:var(--card);
+    border:4px solid var(--ink);
+    box-shadow:8px 8px 0 var(--pink-light), 0 0 0 4px var(--pink-light);
+    padding:34px 26px 30px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; gap:18px;
+    transition:opacity .35s steps(6), transform .35s steps(6);
+  }
+  .card.hide{ opacity:0; pointer-events:none; transform:scale(.92); }
+  .card h2{ font-size:clamp(13px, 3vw, 19px); line-height:2; color:var(--ink); }
+  .card .hint{ font-size:11px; color:#a3798f; line-height:1.9; }
+
+  /* ============ 像素按钮 ============ */
+  .btn{
+    font-family:inherit; cursor:pointer;
+    border:4px solid var(--ink);
+    background:var(--pink); color:#fff;
+    padding:14px 22px; font-size:14px;
+    box-shadow:0 6px 0 var(--pink-dark), 4px 4px 0 rgba(59,34,51,.2);
+    transition:transform .08s steps(2), box-shadow .08s steps(2);
+    text-shadow:2px 2px 0 rgba(59,34,51,.4);
+  }
+  .btn:hover{ transform:translateY(2px); box-shadow:0 4px 0 var(--pink-dark), 4px 4px 0 rgba(59,34,51,.2); }
+  .btn:active{ transform:translateY(6px); box-shadow:0 0 0 var(--pink-dark); }
+  .btn.ghost{ background:#fff; color:var(--ink); box-shadow:0 6px 0 #d9c3cd; text-shadow:none; }
+  .btn.small{ padding:10px 16px; font-size:11px; }
+  .btn.link{ background:none; border:none; box-shadow:none; color:var(--pink-dark); font-size:12px; text-decoration:underline; text-shadow:none; padding:8px; }
+  .btn.link:hover{ transform:none; }
+
+  /* ============ 像素画 ============ */
+  .pix{ display:block; margin:0 auto; }
+  .bounce{ animation:bounce 1s steps(4) infinite; }
+  @keyframes bounce{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-10px);} }
+  .wiggle{ animation:wiggle .9s steps(3) infinite; }
+  @keyframes wiggle{ 0%,100%{ transform:rotate(-4deg);} 50%{ transform:rotate(4deg);} }
+
+  /* ============ 第一步 选项 ============ */
+  .choices{ display:flex; gap:26px; align-items:center; justify-content:center; flex-wrap:wrap; }
+  #btnNo{ position:relative; background:#fff; color:var(--ink); box-shadow:0 6px 0 #c9c9c9; }
+
+  /* ============ 确认弹窗 ============ */
+  .overlay{
+    position:fixed; inset:0; background:rgba(59,34,51,.55);
+    display:flex; align-items:center; justify-content:center; z-index:50;
+    opacity:0; pointer-events:none; transition:opacity .25s steps(4);
+  }
+  .overlay.show{ opacity:1; pointer-events:auto; }
+  .modal{
+    background:#fff; border:4px solid var(--ink);
+    box-shadow:8px 8px 0 rgba(59,34,51,.35);
+    padding:30px 26px; max-width:min(86vw,380px); text-align:center;
+    display:flex; flex-direction:column; gap:16px; align-items:center;
+  }
+  .modal.shake{ animation:shake .4s steps(6); }
+  @keyframes shake{ 0%,100%{transform:translateX(0);} 25%{transform:translateX(-8px);} 75%{transform:translateX(8px);} }
+
+  /* ============ 活动选择 ============ */
+  .acts{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:14px; width:100%; }
+  .act{
+    cursor:pointer; border:4px solid var(--ink); background:#fff;
+    padding:16px 8px; font-size:11px; line-height:1.9;
+    box-shadow:0 5px 0 #e3ccd7;
+    display:flex; flex-direction:column; gap:8px; align-items:center;
+    transition:transform .08s steps(2);
+  }
+  .act .big{ font-size:26px; }
+  .act:hover{ transform:translateY(2px); }
+  .act.sel{ background:var(--pink-light); box-shadow:0 5px 0 var(--pink-dark); }
+  .act.lock{ pointer-events:none; }
+  .act.lock::after{ content:"🔒"; }
+
+  /* ============ 日历 ============ */
+  .cal{ width:100%; max-width:340px; }
+  .cal-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .cal-head .m{ font-size:13px; color:var(--pink-dark); }
+  .cal-nav{ font-family:inherit; cursor:pointer; border:3px solid var(--ink); background:#fff;
+    width:32px; height:32px; font-size:13px; line-height:1; box-shadow:0 4px 0 #e3ccd7; }
+  .cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:5px; }
+  .cal-grid .wd{ font-size:9px; color:#a3798f; padding:4px 0; }
+  .day{
+    aspect-ratio:1; display:flex; align-items:center; justify-content:center;
+    font-size:11px; border:3px solid transparent; cursor:pointer; background:#fdf6f9;
+  }
+  .day:hover{ border-color:var(--pink); }
+  .day.past{ opacity:.28; pointer-events:none; }
+  .day.today{ border-color:var(--yellow); }
+  .day.sel{ background:var(--pink); color:#fff; text-shadow:2px 2px 0 rgba(59,34,51,.4); }
+  .day.empty{ background:none; pointer-events:none; }
+  #picked{ font-size:11px; color:var(--pink-dark); min-height:22px; }
+
+  /* ============ 情书窗口 ============ */
+  .win{
+    width:100%; max-width:400px; text-align:left;
+    border:4px solid var(--ink); background:#fdfdfd;
+    box-shadow:8px 8px 0 rgba(59,34,51,.2);
+  }
+  .win-bar{
+    background:var(--pink); color:#fff; display:flex; align-items:center;
+    padding:8px 10px; gap:8px; font-size:10px;
+  }
+  .win-bar .x{
+    margin-left:auto; cursor:pointer; width:22px; height:22px;
+    border:3px solid var(--ink); background:var(--yellow); color:var(--ink);
+    display:flex; align-items:center; justify-content:center; font-size:10px;
+    box-shadow:2px 2px 0 rgba(59,34,51,.3);
+  }
+  .win-body{ padding:20px 18px; font-size:11px; line-height:2.4; color:var(--ink); min-height:150px; }
+  .win-body .sign{ text-align:right; color:var(--pink-dark); }
+  .cursor{ display:inline-block; width:9px; height:15px; background:var(--pink-dark);
+    vertical-align:-2px; animation:blink .7s steps(1) infinite; }
+  @keyframes blink{ 50%{ opacity:0; } }
+
+  /* ============ 庆祝粒子 ============ */
+  .fx{ position:fixed; inset:0; pointer-events:none; z-index:60; overflow:hidden; }
+  .p{ position:absolute; width:10px; height:10px; animation:fall 2.4s steps(12) forwards; }
+  @keyframes fall{ to{ transform:translateY(105vh) rotate(180deg); opacity:.2; } }
+
+  /* ============ 背景漂浮爱心 ============ */
+  .float-heart{ position:fixed; bottom:-30px; pointer-events:none; z-index:0; animation:rise linear forwards; }
+  @keyframes rise{ to{ transform:translateY(-115vh) translateX(40px); opacity:0; } }
+
+  footer{ margin-top:auto; padding:18px; font-size:9px; color:#c4a1b2; text-align:center; }
+
+  @media (max-width:480px){
+    .acts{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+    .card{ padding:26px 14px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>像素爱心卡片 💗</h1>
+  <div class="sub zh">PIXEL&nbsp;LOVE&nbsp;CARD · 一张会互动的小心意</div>
+</header>
+
+<div class="dots" id="dots"><i></i><i></i><i></i><i></i><i></i></div>
+
+<div class="stage" id="stage">
+
+  <!-- 第 1 步：邀请 -->
+  <section class="card" id="step1">
+    <div id="cat1"></div>
+    <h2 class="zh">你愿意跟我出去吗？</h2>
+    <div class="choices">
+      <button class="btn" id="btnYes">YES!</button>
+      <button class="btn ghost" id="btnNo">No</button>
+    </div>
+    <div class="hint zh" id="noHint">（听说右边的按钮有点害羞）</div>
+  </section>
+
+  <!-- 第 2 步：庆祝 -->
+  <section class="card hide" id="step2">
+    <div id="cat2"></div>
+    <h2 class="zh" style="color:var(--pink-dark)">耶！</h2>
+    <p class="hint zh">你答应我，我真的好开心。</p>
+    <button class="btn small" data-go="3">按一下继续 →</button>
+  </section>
+
+  <!-- 第 3 步：活动 -->
+  <section class="card hide" id="step3">
+    <h2 class="zh">你想一起做什么？</h2>
+    <p class="hint zh">选一个你想和我一起做的</p>
+    <div class="acts" id="acts">
+      <div class="act" data-name="看一场电影"><span class="big">🎬</span><span class="zh">看一场电影</span></div>
+      <div class="act" data-name="吃一顿火锅"><span class="big">🍲</span><span class="zh">吃一顿火锅</span></div>
+      <div class="act" data-name="看一次日落"><span class="big">🌅</span><span class="zh">看一次日落</span></div>
+      <div class="act" data-name="逛一整天街"><span class="big">🎡</span><span class="zh">逛一整天街</span></div>
+    </div>
+    <div class="hint zh" id="actPicked"></div>
+    <button class="btn small hide" id="actGo" data-go="4">继续 →</button>
+  </section>
+
+  <!-- 第 4 步：日历 -->
+  <section class="card hide" id="step4">
+    <h2 class="zh">挑一天约会吧 📅</h2>
+    <p class="hint zh">选一天，安排我们的小小约会吧。</p>
+    <div class="cal">
+      <div class="cal-head">
+        <button class="cal-nav" id="prevM">‹</button>
+        <span class="m" id="mLabel">2026-09</span>
+        <button class="cal-nav" id="nextM">›</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+    <div id="picked" class="zh"></div>
+    <button class="btn small hide" id="dateGo" data-go="5">继续 →</button>
+  </section>
+
+  <!-- 第 5 步：情书 -->
+  <section class="card hide" id="step5">
+    <div class="win">
+      <div class="win-bar"><span>❤ 情书.txt</span><span class="x" id="winX">×</span></div>
+      <div class="win-body zh">
+        <div id="letter"></div><span class="cursor" id="cursor"></span>
+      </div>
+    </div>
+    <h2 class="zh" style="color:var(--pink-dark)" id="finalTitle"></h2>
+    <button class="btn small" id="replay">再看一次 🔁</button>
+  </section>
+
+</div>
+
+<!-- 确认弹窗 -->
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal">
+    <div id="cat3"></div>
+    <h2 class="zh" style="font-size:14px" id="modalTitle">你确定吗？</h2>
+    <p class="hint zh" id="modalText">再考虑一下嘛，人家会伤心的…</p>
+    <div style="display:flex; gap:14px; flex-wrap:wrap; justify-content:center">
+      <button class="btn small" id="modalYes">再想想 🤔</button>
+      <button class="btn ghost small" id="modalNo">我确定</button>
+    </div>
+  </div>
+</div>
+
+<div class="fx" id="fx"></div>
+<footer class="zh">made with ❤ &amp; pixels · 2026</footer>
+
+<script>
+/* ================= 像素画渲染 ================= */
+function pixel(el, grid, palette, px){
+  px = px || 6;
+  var lines = grid.trim().split("\n").map(s => s.trim());
+  var h = lines.length, w = lines[0].length, sh = [];
+  for(var y=0; y<h; y++)
+    for(var x=0; x<w; x++){
+      var c = lines[y][x];
+      if(c !== "." && palette[c]) sh.push((x+1)*px + "px " + (y+1)*px + "px 0 " + palette[c]);
+    }
+  el.className = "pix";
+  el.style.width = el.style.height = px + "px";
+  el.style.boxShadow = sh.join(",");
+  el.style.marginBottom = px*2 + "px";
+}
+
+var HEART = `
+. # # . # # .
+# L L # L L #
+# L L L L L #
+# L L L L L .
+. # L L L # .
+. . # L # . .
+. . . # . . .
+`;
+
+var CAT = `
+. # . . . . # .
+# # # . . # # #
+# w # . . # w #
+# # # . . # # #
+# # . . . . # #
+. # # w w # # .
+. # # # # # # .
+. # . # # . # .
+. # . . . . # .
+`;
+
+var CAT_SAD = `
+. # . . . . # .
+# # # . . # # #
+# t # . . # t #
+# # # . . # # #
+# # . . . . # #
+. # # . . # # .
+. # # # # # # .
+. # . # # . # .
+. # . . . . # .
+`;
+
+var heartEl = () => { var d = document.createElement("div"); return d; };
+
+function drawCat(el, sad){
+  pixel(el, sad ? CAT_SAD : CAT,
+    { "#":"#3b2233", "w":"#ffffff", "t":"#2196f3" }, 9);
+  el.classList.add("bounce");
+}
+function drawHeart(el){
+  pixel(el, HEART, { "#":"#d92b62", "L":"#ff5a8a" }, 10);
+  el.classList.add("wiggle");
+}
+
+drawCat(document.getElementById("cat1"), false);
+drawCat(document.getElementById("cat2"), false);
+drawCat(document.getElementById("cat3"), true);
+
+/* ================= 8-bit 音效 ================= */
+var AC = null;
+function beep(freq, dur){
+  try{
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    var o = AC.createOscillator(), g = AC.createGain();
+    o.type = "square"; o.frequency.value = freq;
+    g.gain.setValueAtTime(.06, AC.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001, AC.currentTime + (dur||.12));
+    o.connect(g); g.connect(AC.destination);
+    o.start(); o.stop(AC.currentTime + (dur||.12));
+  }catch(e){}
+}
+
+/* ================= 步骤切换 ================= */
+var current = 1;
+function goStep(n){
+  beep(660, .1);
+  document.querySelectorAll(".card").forEach(c => c.classList.add("hide"));
+  var el = document.getElementById("step" + n);
+  el.classList.remove("hide");
+  document.querySelectorAll("#dots i").forEach((d,i) => d.classList.toggle("on", i < n));
+  current = n;
+  if(n === 5) startLetter();
+}
+document.querySelectorAll("[data-go]").forEach(b =>
+  b.addEventListener("click", () => goStep(+b.dataset.go)));
+
+/* ================= 第 1 步：YES / NO ================= */
+var noTried = 0;
+var yesBtn = document.getElementById("btnYes");
+var noBtn = document.getElementById("btnNo");
+var noHint = document.getElementById("noHint");
+var overlay = document.getElementById("overlay");
+var modal = document.getElementById("modal");
+var modalTitle = document.getElementById("modalTitle");
+var modalText = document.getElementById("modalText");
+var modalYes = document.getElementById("modalYes");
+var modalNo = document.getElementById("modalNo");
+var refuse = 0;
+
+noBtn.addEventListener("mouseenter", dodge);
+noBtn.addEventListener("touchstart", function(e){ e.preventDefault(); dodge(); }, {passive:false});
+
+function dodge(){
+  if(noTried >= 3) return;
+  noTried++;
+  beep(220, .08);
+  var s = 1 - noTried * .22;
+  noBtn.style.transform = "translate(" +
+    (Math.random()*120-60).toFixed(0) + "px," +
+    (Math.random()*60-30).toFixed(0) + "px) scale(" + s + ")";
+  yesBtn.style.transform = "scale(" + (1 + noTried*.12) + ")";
+  var msgs = ["（它开始逃跑了！）","（它越来越小了…）","（它马上就要消失了！）"];
+  noHint.textContent = msgs[noTried-1];
+  if(noTried === 3){
+    setTimeout(function(){
+      noBtn.style.transition = "all .3s steps(4)";
+      noBtn.style.opacity = "0";
+      noBtn.style.pointerEvents = "none";
+      noHint.textContent = "现在只剩下 YES 了 😏";
+      beep(880, .15);
+    }, 350);
+  }
+}
+
+noBtn.addEventListener("click", function(){
+  overlay.classList.add("show");
+  beep(330, .12);
+});
+
+modalYes.addEventListener("click", function(){
+  overlay.classList.remove("show");
+  beep(520, .1);
+});
+
+modalNo.addEventListener("click", function(){
+  refuse++;
+  modal.classList.remove("shake");
+  void modal.offsetWidth;
+  modal.classList.add("shake");
+  beep(180, .18);
+  if(refuse === 1){
+    modalTitle.textContent = "真的确定吗？";
+    modalText.textContent = "再给你一次重新组织语言的机会 🥺";
+  }else{
+    modalTitle.textContent = "不行！";
+    modalText.textContent = "我拒绝你的拒绝！😤 快去点 YES！";
+    modalNo.style.pointerEvents = "none";
+    modalNo.style.opacity = ".4";
+  }
+});
+
+overlay.addEventListener("click", function(e){
+  if(e.target === overlay) overlay.classList.remove("show");
+});
+
+yesBtn.addEventListener("click", function(){
+  overlay.classList.remove("show");
+  confetti();
+  goStep(2);
+});
+
+/* ================= 第 3 步：活动 ================= */
+var chosen = "";
+document.querySelectorAll(".act").forEach(function(a){
+  a.addEventListener("click", function(){
+    chosen = a.dataset.name;
+    document.querySelectorAll(".act").forEach(x => x.classList.remove("sel"));
+    a.classList.add("sel");
+    beep(740, .1);
+    setTimeout(function(){
+      document.querySelectorAll(".act").forEach(x => {
+        x.classList.add("lock");
+        if(x !== a){ x.style.opacity = ".35"; }
+      });
+      document.getElementById("actPicked").textContent = "就决定是这个了 🔒";
+      document.getElementById("actGo").classList.remove("hide");
+      beep(988, .14);
+    }, 350);
+  });
+});
+
+/* ================= 第 4 步：日历 ================= */
+var today = new Date(); today.setHours(0,0,0,0);
+var view = new Date(today.getFullYear(), today.getMonth(), 1);
+var pickedDate = null;
+var WD = ["日","一","二","三","四","五","六"];
+
+function renderCal(){
+  var y = view.getFullYear(), m = view.getMonth();
+  document.getElementById("mLabel").textContent = y + "-" + String(m+1).padStart(2,"0");
+  var grid = document.getElementById("calGrid");
+  grid.innerHTML = "";
+  WD.forEach(function(w){
+    var d = document.createElement("div");
+    d.className = "wd zh"; d.textContent = w;
+    grid.appendChild(d);
+  });
+  var first = new Date(y, m, 1).getDay();
+  var days = new Date(y, m+1, 0).getDate();
+  for(var i=0; i<first; i++){
+    var e = document.createElement("div"); e.className = "day empty"; grid.appendChild(e);
+  }
+  for(var d=1; d<=days; d++){
+    (function(d){
+      var cell = document.createElement("div");
+      cell.className = "day";
+      cell.textContent = d;
+      var date = new Date(y, m, d);
+      if(date < today) cell.classList.add("past");
+      else{
+        if(date.getTime() === today.getTime()) cell.classList.add("today");
+        cell.addEventListener("click", function(){
+          document.querySelectorAll(".day").forEach(x => x.classList.remove("sel"));
+          cell.classList.add("sel");
+          pickedDate = date;
+          document.getElementById("picked").textContent =
+            "📝 就 " + (y) + " 年 " + (m+1) + " 月 " + d + " 日，不见不散！";
+          document.getElementById("dateGo").classList.remove("hide");
+          beep(880, .12);
+        });
+      }
+      grid.appendChild(cell);
+    })(d);
+  }
+}
+document.getElementById("prevM").addEventListener("click", function(){
+  var min = new Date(today.getFullYear(), today.getMonth(), 1);
+  if(view > min){ view = new Date(view.getFullYear(), view.getMonth()-1, 1); renderCal(); beep(500,.06); }
+});
+document.getElementById("nextM").addEventListener("click", function(){
+  view = new Date(view.getFullYear(), view.getMonth()+1, 1); renderCal(); beep(500,.06);
+});
+renderCal();
+
+/* ================= 第 5 步：情书 ================= */
+var LETTER = [
+  "亲爱的你：",
+  "",
+  "不管走到哪一步，",
+  "你都是我心里最可爱的那一个。",
+  "别让任何人说你不是，好吗？",
+  "",
+  "有你在的日子，",
+  "连等红灯都变得值得期待。",
+  "所以，就让我们把这一天，",
+  "过成小小的纪念日吧。",
+  "",
+  "—— 亲亲，你的他 ❤"
+].join("\n");
+
+var typed = false;
+function startLetter(){
+  var el = document.getElementById("letter");
+  var cur = document.getElementById("cursor");
+  if(typed){ el.textContent = LETTER; return; }
+  typed = true;
+  el.textContent = "";
+  var i = 0;
+  var timer = setInterval(function(){
+    if(i >= LETTER.length){ clearInterval(timer); done(); return; }
+    el.textContent += LETTER[i];
+    if(LETTER[i] !== " " && i % 2 === 0) beep(980 + Math.random()*200, .03);
+    i++;
+  }, 70);
+  function done(){
+    var t = document.getElementById("finalTitle");
+    var info = [];
+    if(chosen) info.push(chosen);
+    if(pickedDate) info.push(pickedDate.getFullYear() + "-" +
+      String(pickedDate.getMonth()+1).padStart(2,"0") + "-" +
+      String(pickedDate.getDate()).padStart(2,"0"));
+    t.textContent = "就这样约了！💌" + (info.length ? " " + info.join(" · ") : "");
+    document.getElementById("winX").style.display = "";
+    confetti();
+  }
+}
+
+document.getElementById("winX").addEventListener("click", function(){
+  this.style.display = "none";
+  var el = document.getElementById("letter");
+  el.textContent = "（情书被害羞地藏起来了…再看一次吧 🔁）";
+  document.getElementById("cursor").style.display = "none";
+  beep(300, .1);
+});
+
+document.getElementById("replay").addEventListener("click", function(){
+  location.reload();
+});
+
+/* ================= 粒子 & 漂浮爱心 ================= */
+function confetti(){
+  var fx = document.getElementById("fx");
+  var colors = ["#ff5a8a","#ffd447","#4ecb71","#5aa9ff","#ff9db6"];
+  for(var i=0; i<40; i++){
+    (function(i){
+      var p = document.createElement("div");
+      p.className = "p";
+      p.style.left = Math.random()*100 + "vw";
+      p.style.top = "-12px";
+      p.style.background = colors[i % colors.length];
+      p.style.animationDelay = Math.random()*.5 + "s";
+      p.style.animationDuration = (1.8 + Math.random()*1.2) + "s";
+      fx.appendChild(p);
+      setTimeout(function(){ p.remove(); }, 4000);
+    })(i);
+  }
+}
+
+(function floatHearts(){
+  setInterval(function(){
+    var h = heartEl();
+    pixel(h, HEART, { "#":"#f0a8bd", "L":"#ffc6d6" }, 5);
+    h.classList.remove("pix"); h.classList.add("float-heart");
+    h.style.left = Math.random()*96 + "vw";
+    h.style.animationDuration = 9 + Math.random()*7 + "s";
+    document.body.appendChild(h);
+    setTimeout(function(){ h.remove(); }, 17000);
+  }, 1800);
+})();
+</script>
+</body>
+</html>
