@@ -106,13 +106,13 @@
   .wiggle{ animation:wiggle .9s steps(3) infinite; }
   @keyframes wiggle{ 0%,100%{ transform:rotate(-4deg);} 50%{ transform:rotate(4deg);} }
 
-  /* ============ 问题行（文字 + 右上方颜文字） ============ */
+  /* ============ 问题区（颜文字在上，文字在下居中） ============ */
   .qline{
-    display:flex; align-items:flex-start; justify-content:center;
-    gap:14px; flex-wrap:wrap; width:100%;
+    display:flex; flex-direction:column; align-items:center;
+    gap:16px; width:100%;
   }
   .qline h2{ line-height:1.5; }
-  .kaomoji{ flex-shrink:0; margin-top:-6px; }
+  .kaomoji{ flex-shrink:0; }
 
   /* ============ 第一步 选项 ============ */
   .choices{ display:flex; gap:26px; align-items:center; justify-content:center; flex-wrap:wrap; }
